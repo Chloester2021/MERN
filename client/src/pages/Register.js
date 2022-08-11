@@ -1,8 +1,9 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { Logo, FormRow } from "../components";
+import { Logo, FormRow, Alert } from "../components";
 import Wrapper from "../assets/wrappers/RegisterPage";
-
+import { useAppContext } from "../context/appContext";
+import { useNavigate } from "react-router-dom";
 const initialState = {
   name: "",
   email: "",
@@ -11,28 +12,61 @@ const initialState = {
 };
 
 function Register() {
+  const navigate = useNavigate();
   const [values, setValues] = useState(initialState);
+  const { isLoading, showAlert, displayAlert, user, setupUser } =
+    useAppContext();
+  useEffect(() => {
+    if (user) {
+      setTimeout(() => {
+        navigate("/");
+      }, 3000);
+    }
+  }, [user, navigate]);
+  const toggleMember = () => {
+    setValues({ ...values, isMember: !values.isMember });
+  };
   const handleChange = (e) => {
-    console.log(e.target);
+    setValues({ ...values, [e.target.name]: e.target.value });
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log(e.target);
+    const { name, email, password, isMember } = values;
+    if (!email || !password || (!isMember && !name)) {
+      displayAlert();
+      return;
+    }
+    const currentUser = { name, email, password };
+    if (isMember) {
+      setupUser({
+        currentUser,
+        endPoint: "login",
+        alertText: "Login Successful! Redirecting...",
+      });
+    } else {
+      setupUser({
+        currentUser,
+        endPoint: "register",
+        alertText: "User Created! Redirecting...",
+      });
+    }
   };
   return (
     <Wrapper className="full-page">
       <form className="form" onSubmit={onSubmit}>
         <Logo />
-        <h3>login</h3>
-
+        <h3>{values.isMember ? "login" : "register"}</h3>
+        {showAlert && <Alert />}
         {/* name field */}
-        <FormRow
-          type="text"
-          name="name"
-          value={values.name}
-          handleChange={handleChange}
-        />
+        {!values.isMember && (
+          <FormRow
+            type="text"
+            name="name"
+            value={values.name}
+            handleChange={handleChange}
+          />
+        )}
 
         {/* email field */}
         <FormRow
@@ -49,9 +83,15 @@ function Register() {
           handleChange={handleChange}
         />
 
-        <button type="submit" className="btn btn-block">
-          submit
+        <button type="submit" className="btn btn-block" disabled={isLoading}>
+          {!values.isMember ? `Register` : `Login`}
         </button>
+        <p>
+          {values.isMember ? "Not a member yet?" : "Already a member?"}
+          <button type="button" className="member-btn" onClick={toggleMember}>
+            {values.isMember ? "Register" : "Login"}
+          </button>
+        </p>
       </form>
     </Wrapper>
   );
