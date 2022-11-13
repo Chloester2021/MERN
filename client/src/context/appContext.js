@@ -6,6 +6,8 @@ import {
   SETUP_USER_BEGIN,
   SETUP_USER_SUCCESS,
   SETUP_USER_ERROR,
+  TOGGLE_SIDEBAR,
+  LOGOUT_USER,
 } from "./action";
 import reducer from "./reducer";
 
@@ -22,6 +24,7 @@ export const initialState = {
   token: token,
   userLocation: userLocation || "",
   jobLocation: userLocation || "",
+  showSidebar: false,
 };
 const AppContext = React.createContext();
 const AppProvider = ({ children }) => {
@@ -68,13 +71,24 @@ const AppProvider = ({ children }) => {
     }
     clearAlert();
   };
+
+  const toggleSidebar = () => {
+    dispatch({ type: TOGGLE_SIDEBAR });
+  };
+
+  const logoutUser = () => {
+    dispatch({ type: LOGOUT_USER });
+    removeUserFromLocalStorage();
+  };
+
   return (
     <AppContext.Provider
       value={{
         ...state,
         displayAlert,
-
+        toggleSidebar,
         setupUser,
+        logoutUser,
       }}
     >
       {children}

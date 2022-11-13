@@ -48,6 +48,8 @@ const login = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
+  // this is the req.user from auth.js
+  // console.log(req.user);
   res.send("updateUser");
 };
 
